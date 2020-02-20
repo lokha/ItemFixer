@@ -1,47 +1,50 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package ru.leymooo.fixer.utils;
-
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import org.bukkit.inventory.ItemStack;
 
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.nbt.NbtBase;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 import com.comphenix.protocol.wrappers.nbt.NbtWrapper;
+import org.bukkit.inventory.ItemStack;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class MiniNbtFactory {
-    
     private static Method m;
-    
+
     static {
         try {
             m = NbtFactory.class.getDeclaredMethod("getStackModifier", ItemStack.class);
             m.setAccessible(true);
-        } catch (NoSuchMethodException | SecurityException e) {
-            e.printStackTrace();
+        } catch (SecurityException | NoSuchMethodException var1) {
+            var1.printStackTrace();
         }
+
     }
-    
-    @SuppressWarnings("unchecked")
-    public static NbtWrapper<?> fromItemTag(ItemStack stack) {        
-        StructureModifier<NbtBase<?>> modifier = null;
+
+    public MiniNbtFactory() {
+    }
+
+    public static NbtWrapper<?> fromItemTag(ItemStack stack) {
+        StructureModifier modifier = null;
+
         try {
-            modifier = (StructureModifier<NbtBase<?>>) m.invoke(null, stack);
-        } catch (IllegalAccessException | IllegalArgumentException
-                | InvocationTargetException e) {
-            e.printStackTrace();
+            modifier = (StructureModifier)m.invoke((Object)null, stack);
+        } catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException var3) {
+            var3.printStackTrace();
         }
-        NbtBase<?> result = modifier.read(0);
-        //Try fix old items 
+
+        NbtBase<?> result = (NbtBase)modifier.read(0);
         if (result != null && result.toString().contains("{\"name\": \"null\"}")) {
-            modifier.write(0, null);
-            result = modifier.read(0);
+            modifier.write(0, (Object)null);
+            result = (NbtBase)modifier.read(0);
         }
-        if (result == null) {
-            return null;
-        }
-        return NbtFactory.fromBase(result);
+
+        return result == null ? null : NbtFactory.fromBase(result);
     }
 }

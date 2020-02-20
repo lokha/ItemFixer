@@ -46,38 +46,29 @@ public class PluginUpdater {
     public UpdaterResult checkUpdates() throws UpdaterException {
         if (this.currentVersion == 0) currentVersion = parseVersion();
         try {
-            //Connect to GitHub API.
-            URL url = new URL(BASE_URL.concat("repos").concat(repositoryUrl).concat("commits"));
-            //Parse JSON.
-            JsonObject[] objects = GSON.fromJson(new BufferedReader(
-                            new InputStreamReader(
-                                    url.openStream(),
-                                    Charsets.UTF_8.name())),
-                    JsonObject[].class);
+            URL url = new URL("https://api.github.com/".concat("repos").concat(this.repositoryUrl).concat("commits"));
+            JsonObject[] objects = (JsonObject[])GSON.fromJson(new BufferedReader(new InputStreamReader(url.openStream(), Charsets.UTF_8.name())), JsonObject[].class);
             if (objects.length == 0) {
                 throw new UpdaterException("commits is empty", this);
             }
-            //Get the first object in array.
+
             JsonObject object = objects[0];
-            //Extract the version from commit message.
             String[] toParse = object.get("commit").getAsJsonObject().get("message").getAsString().replace(".", "").split("\\n");
             if (toParse.length == 0) {
                 throw new UpdaterException("commits is empty", this);
             }
+
             int version = Integer.parseInt(toParse[0]);
-            //Compare current version with remote version.
-            if (version != currentVersion) {
-                //Yay, we found a new update!
+            if (version != this.currentVersion) {
                 return UpdaterResult.UPDATE_FOUND;
             }
-        } catch (MalformedURLException e) {
-            throw new UpdaterException(e.getMessage(), this);
-        } catch (IOException e) {
-            throw new UpdaterException("unhandled error " + e.getMessage(), this);
-        } catch (NumberFormatException ignore) {
-            //Ignore it.
+        } catch (MalformedURLException var6) {
+            throw new UpdaterException(var6.getMessage(), this);
+        } catch (IOException var7) {
+            throw new UpdaterException("unhandled error " + var7.getMessage(), this);
+        } catch (NumberFormatException var8) {
         }
-        //Updates not found :(
+
         return UpdaterResult.UPDATE_NOT_FOUND;
     }
 
@@ -88,9 +79,9 @@ public class PluginUpdater {
      */
     private int parseVersion() throws UpdaterException {
         try {
-            return Integer.parseInt(plugin.getDescription().getVersion().replace(".", ""));
-        } catch (NumberFormatException ex) {
-            throw new UpdaterException("cannot parse version " + ex.getMessage(), this);
+            return Integer.parseInt(this.plugin.getDescription().getVersion().replace(".", ""));
+        } catch (NumberFormatException var2) {
+            throw new UpdaterException("cannot parse version " + var2.getMessage(), this);
         }
     }
 
@@ -100,7 +91,7 @@ public class PluginUpdater {
      * @return plugin.
      */
     public Plugin getPlugin() {
-        return plugin;
+        return this.plugin;
     }
 
     /**
@@ -109,6 +100,6 @@ public class PluginUpdater {
      * @return - version number
      */
     public int getCurrentVersion() {
-        return currentVersion;
+        return this.currentVersion;
     }
 }
