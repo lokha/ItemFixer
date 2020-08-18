@@ -195,7 +195,7 @@ public class ItemChecker {
                 tag.remove("BlockEntityTag");
                 cheat = true;
             } else if (mat != Material.WRITTEN_BOOK || (this.ignoreNbt.contains("ClickEvent") || !tagS.contains("ClickEvent")) && (this.ignoreNbt.contains("run_command") || !tagS.contains("run_command"))) {
-                if (mat == Material.MONSTER_EGG && !this.ignoreNbt.contains("EntityTag") && tag.containsKey("EntityTag") && this.fixEgg(tag)) {
+                if (mat == Material.MONSTER_EGG && !this.ignoreNbt.contains("EntityTag") && tag.containsKey("EntityTag") && this.fixEgg(tag, player)) {
                     cheat = true;
                 } else if (mat == Material.ARMOR_STAND && !this.ignoreNbt.contains("EntityTag") && tag.containsKey("EntityTag")) {
                     tag.remove("EntityTag");
@@ -216,6 +216,8 @@ public class ItemChecker {
                 cheat = true;
             }
         } catch (Exception var9) {
+            plugin.getLogger().severe("Ошибка проверки предмета: player " + player.getName() + ", item " + stack);
+            var9.printStackTrace();
         }
 
         return cheat;
@@ -408,10 +410,11 @@ public class ItemChecker {
         }
     }
 
-    private boolean fixEgg(NbtCompound tag) {
+    private boolean fixEgg(NbtCompound tag, Player player) {
         NbtCompound enttag = tag.getCompound("EntityTag");
         int size = enttag.getKeys().size();
         if (size >= 2) {
+            plugin.getLogger().info("FixEgg: player " + player.getName() + ", удаляем лишние теги " + tag);
             Object id = enttag.getObject("id");
             Object color = enttag.getObject("Color");
             enttag.getKeys().clear();
